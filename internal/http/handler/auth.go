@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		FirstName string `json:"first_name" binding:"required"`
 		LastName  string `json:"last_name"  binding:"required"`
 		Email     string `json:"email"      binding:"required,email"`
-		Password  string `json:"password"   binding:"required,min=6"`
+		Password  string `json:"password"   binding:"required"`
 		Type      string `json:"type"       binding:"required,oneof=driver rider"`
 		License   string `json:"drivers_license_number"`
 	}

@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS trip_requests;
+DROP TABLE IF EXISTS trips;
+DROP TABLE IF EXISTS trip_positions;
