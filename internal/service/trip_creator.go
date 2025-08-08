@@ -2,9 +2,10 @@ package service
 
 import (
 	"errors"
-	"github.com/javierMorales9/rideshare-go/internal/db"
-	"github.com/javierMorales9/rideshare-go/internal/domain/model"
 	"math/rand"
+
+	"github.com/javierMorales9/rideshare-go/internal/domain/model"
+	"gorm.io/gorm"
 )
 
 // TripCreator replica la lógica de Rails (driver aleatorio).
@@ -13,15 +14,19 @@ type TripCreator struct {
 }
 
 // CreateTrip crea un Trip y lo guarda. Devuelve el Trip o error.
-func (tc TripCreator) CreateTrip() (*model.Trip, error) {
+func (tc TripCreator) CreateTrip(tx *gorm.DB) (*model.Trip, error) {
+	if tx == nil {
+		return nil, errors.New("transaction db is required")
+	}
+
 	var req model.TripRequest
-	if err := db.DB.
+	if err := tx.
 		Preload("Rider").
 		First(&req, tc.TripRequestID).Error; err != nil {
 		return nil, err
 	}
 
-	driver, err := pickRandomDriver()
+	driver, err := pickRandomDriver(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -31,15 +36,15 @@ func (tc TripCreator) CreateTrip() (*model.Trip, error) {
 		DriverID:      driver.ID,
 	}
 
-	if err := db.DB.Create(&trip).Error; err != nil {
+	if err := tx.Create(&trip).Error; err != nil {
 		return nil, err
 	}
 	return &trip, nil
 }
 
-func pickRandomDriver() (*model.User, error) {
+func pickRandomDriver(tx *gorm.DB) (*model.User, error) {
 	var drivers []model.User
-	if err := db.DB.
+	if err := tx.
 		Where("type = ?", model.UserTypeDriver).
 		Find(&drivers).Error; err != nil {
 		return nil, err

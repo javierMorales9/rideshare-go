@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/javierMorales9/rideshare-go/internal/config"
@@ -29,10 +28,17 @@ func main() {
 
 	api := r.Group("/api", middleware.AuthRequired)
 	{
-		api.GET("/me", func(c *gin.Context) {
-			uid := c.GetUint("currentUserID")
-			c.JSON(http.StatusOK, gin.H{"user_id": uid})
-		})
+		api.GET("/me", handler.Me)
+
+		// TripRequests
+		api.POST("/trip_requests", handler.CreateTripRequest)
+		api.GET("/trip_requests/:id", handler.ShowTripRequest)
+
+		// Trips
+		api.GET("/trips", handler.ListTrips)
+		api.GET("/trips/:id", handler.ShowTrip)
+		api.GET("/trips/:id/details", handler.TripDetails)
+		api.GET("/trips/my", handler.ListMyTrips)
 	}
 
 	log.Printf("🚀  API escuchando en :%s", cfg.Port)

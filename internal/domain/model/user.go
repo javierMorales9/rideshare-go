@@ -1,7 +1,9 @@
 package model
 
 import (
+	"database/sql"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -78,4 +80,20 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 		return fmt.Errorf("password hash cannot be blank")
 	}
 	return nil
+}
+
+func (u User) AverageRating(tx *gorm.DB) float64 {
+	if !u.IsDriver() {
+		return 0
+	}
+	var avg sql.NullFloat64
+	tx.Model(&Trip{}).
+		Where("driver_id = ? AND rating IS NOT NULL", u.ID).
+		Select("AVG(rating)::float").
+		Scan(&avg)
+
+	if !avg.Valid {
+		return 0
+	}
+	return math.Round(avg.Float64*100) / 100
 }

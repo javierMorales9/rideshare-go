@@ -70,3 +70,8 @@ func Register(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, gin.H{"id": u.ID})
 }
+
+func Me(c *gin.Context) {
+	uid := c.GetUint("currentUserID")
+	c.JSON(http.StatusOK, gin.H{"user_id": uid})
+}
